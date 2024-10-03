@@ -1,0 +1,63 @@
+definitions:
+  models.AddSongRequest:
+    properties:
+      group_name:
+        description: Название группы
+        type: string
+      link:
+        description: Ссылка на песню
+        type: string
+      release_date:
+        description: Дата релиза
+        type: string
+      song_name:
+        description: Название песни
+        type: string
+      text:
+        description: Текст песни
+        type: string
+    type: object
+  models.AddSongResponse:
+    properties:
+      id:
+        description: ID добавленной песни
+        type: string
+      message:
+        description: Сообщение о результате
+        type: string
+      success:
+        description: Успех операции
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /songs:
+    post:
+      consumes:
+      - application/json
+      description: Add new song to the library
+      parameters:
+      - description: Song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AddSongResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Add new song
+      tags:
+      - songs
+swagger: "2.0"
