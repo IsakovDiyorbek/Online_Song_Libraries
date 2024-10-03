@@ -7,7 +7,7 @@ import (
 )
 
 type Song struct {
-	ID          uuid.UUID `json:"id"`			
+	ID          string `json:"id"`			
 	GroupName   string    `json:"group_name"`        // Название группы
 	SongName    string    `json:"song_name"`         // Название песни
 	ReleaseDate string    `json:"release_date"` // Дата релиза
@@ -41,3 +41,29 @@ type SongFilter struct{
 	PageSize int
 }
 
+
+type UpdateSongRequest struct {
+	ID          uuid.UUID `json:"id"`		
+    GroupName   string `json:"group_name,omitempty"`
+    SongName    string `json:"song_name,omitempty"`
+    ReleaseDate string `json:"release_date,omitempty"`
+    Text        string `json:"text,omitempty"`
+    Link        string `json:"link,omitempty"`
+}
+
+
+type GetAllSongsRequest struct {
+    GroupName string `json:"group_name"`
+    SongName  string `json:"song_name"`
+    Text      string `json:"text"`
+    Limit     int    `json:"limit"`
+    Offset    int    `json:"offset"`
+}
+
+
+
+type VerseResponse struct {
+	Id   string  `json:"id"`
+	VersNum  int    `json:"verseNum"`
+	Text     string `json:"text"`
+}

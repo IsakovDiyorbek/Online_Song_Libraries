@@ -11,7 +11,14 @@ import (
 func NewGin(h *handler.Handler) *gin.Engine {
 	router := gin.Default()
 	router.GET("api/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	
 	router.POST("/songs", h.AddSong)
+	router.GET("/songs", h.GetSongs)
+	router.GET("/songs/all", h.GetAll)
+	router.DELETE("/songs/:id", h.DeleteSong)
+	router.PUT("/songs/:id", h.UpdateSong)
+	router.GET("/songs/:id/verse/:verseNum", h.GetSongText)
+
 
 	return router
 }
