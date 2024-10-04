@@ -6,6 +6,7 @@ import (
 
 	"github.com/Online_Song_Libraries/models"
 	"github.com/gin-gonic/gin"
+
 )
 
 // @Summary Add new song
@@ -36,60 +37,6 @@ func (h *Handler) AddSong(c *gin.Context) {
 
 }
 
-
-
-
-// @Summary Get songs
-// @Description Get songs from the library
-// @Tags songs
-// @Accept  json
-// @Produce  json
-// @Param group_name query string false "Group name"
-// @Param song_name query string false "Song name"
-// @Param page query int false "Page number"
-// @Param page_size query int false "Page size"
-// @Success 200 {array} models.Song
-// @Failure 400 {object} error
-// @Failure 500 {object} error
-// @Router /songs [get]
-func (h *Handler) GetSongs(c *gin.Context) {
-	var filter models.SongFilter
-
-	filter.GroupName = c.Query("group_name")
-	filter.SongName = c.Query("song_name")
-	pageStr := c.Query("page")
-	pageSizeStr := c.Query("page_size")
-
-	if pageStr == "" {
-		filter.Page = 1 
-	} else {
-		page, err := strconv.Atoi(pageStr)
-		if err == nil {
-			filter.Page = page
-		}
-	}
-
-	if pageSizeStr == "" {
-		filter.PageSize = 10 
-	} else {
-		pageSize, err := strconv.Atoi(pageSizeStr)
-		if err == nil {
-			filter.PageSize = pageSize
-		}
-	}
-
-	songs, err := h.song.GetSongs(&filter)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, songs)
-}
-
-
-
-// write swagger
 // @Summary Get all songs
 // @Description Get all songs from the library
 // @Tags songs
@@ -146,22 +93,20 @@ func (h *Handler) GetAll(c *gin.Context) {
 // @Tags songs
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Song ID"
-// @Success 200 {object} models.AddSongResponse
+// @Param id query string true "Song ID"
+// @Success 200 {object} models.DeleteSongResponse
 // @Failure 400 {object} error
 // @Failure 500 {object} error
 // @Router /songs/{id} [delete]
 func (h *Handler) DeleteSong(c *gin.Context) {
 	songID := c.Query("id")
-
-
-	err := h.song.DeleteSong(songID)
+	res, err := h.song.DeleteSong(&models.DeleteSongRequest{Id: songID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Song deleted successfully"})
+	c.JSON(http.StatusOK, res)
 }
 
 
@@ -171,29 +116,34 @@ func (h *Handler) DeleteSong(c *gin.Context) {
 // @Tags songs
 // @Accept  json
 // @Produce  json
-// @Param id path string true "Song ID"
-// @Param song body models.UpdateSongRequest true "Song data"
-// @Success 200 {object} models.AddSongResponse
+// @Param id query string true "Song ID"
+// @Param group_name query string false "Group Name"
+// @Param song_name query string false "Song Name"
+// @Param release_date query string false "Release Date"
+// @Param text query string false "Text"
+// @Param link query string false "Link"
+// @Success 200 {object} models.UpdateSongResponse
 // @Failure 400 {object} error
 // @Failure 500 {object} error
 // @Router /songs/{id} [put]
 func (h *Handler) UpdateSong(c *gin.Context) {
-	songID:= c.Query("id")
+	request := models.UpdateSongRequest{}
+	request.Id = c.Query("id")
+	request.GroupName = c.Query("group_name")
+	request.SongName = c.Query("song_name")
+	request.ReleaseDate = c.Query("release_date")
+	request.Text = c.Query("text")
+	request.Link = c.Query("link")
 
-	var request models.UpdateSongRequest
-	err := c.BindJSON(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	
 
-	err = h.song.UpdateSong(songID, request)
+	res, err := h.song.UpdateSong(&request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Song updated successfully"})
+	c.JSON(http.StatusOK, res)
 }
 
 
@@ -203,25 +153,27 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 // @Tags songs
 // @Accept  json
 // @Produce  json
-// @Param id path string true "Song ID"
-// @Param verseNum path int true "Verse number"
+// @Param id query string true "Song ID"
+// @Param verse_num query int true "Verse Number"
 // @Success 200 {object} models.VerseResponse
 // @Failure 400 {object} error
 // @Failure 500 {object} error
-// @Router /songs/{id}/verse/{verseNum} [get]
+// @Router /songs/{id}/verse/{verse_num} [get]
 func (h *Handler) GetSongText(c *gin.Context) {
+	request := models.GetSongTextRequest{}
+	request.Id = c.Query("id")
+	verseNumStr := c.Query("verse_num")
+	if verseNumStr != ""{
+		verseNum, err := strconv.Atoi(verseNumStr)
+		if err != nil{
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid verse number"})
+			return
+		}
+		request.VerseNum = verseNum
+	} 
 
-	songIDQuery := c.Query("id")
-	verseNumParam := c.Query("verseNum")
 
-	verseNum, err := strconv.Atoi(verseNumParam)
-	if err != nil || verseNum < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid verse number"})
-		return
-	}
-
-
-	verseResponse, err := h.song.GetSongText(songIDQuery, verseNum)
+	verseResponse, err := h.song.GetSongText(&request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -16,64 +16,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/songs": {
-            "get": {
-                "description": "Get songs from the library",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "songs"
-                ],
-                "summary": "Get songs",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Group name",
-                        "name": "group_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Song name",
-                        "name": "song_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Page size",
-                        "name": "page_size",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Song"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "description": "Add new song to the library",
                 "consumes": [
@@ -196,24 +138,45 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Song ID",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
-                        "description": "Song data",
-                        "name": "song",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UpdateSongRequest"
-                        }
+                        "type": "string",
+                        "description": "Group Name",
+                        "name": "group_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Song Name",
+                        "name": "song_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release Date",
+                        "name": "release_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Text",
+                        "name": "text",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Link",
+                        "name": "link",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.AddSongResponse"
+                            "$ref": "#/definitions/models.UpdateSongResponse"
                         }
                     },
                     "400": {
@@ -240,10 +203,10 @@ const docTemplate = `{
                 "summary": "Delete song",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "Song ID",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -251,7 +214,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.AddSongResponse"
+                            "$ref": "#/definitions/models.DeleteSongResponse"
                         }
                     },
                     "400": {
@@ -283,14 +246,14 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Song ID",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "Verse number",
-                        "name": "verseNum",
-                        "in": "path",
+                        "description": "Verse Number",
+                        "name": "verse_num",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -356,6 +319,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.DeleteSongResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "models.Song": {
             "type": "object",
             "properties": {
@@ -392,26 +366,14 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UpdateSongRequest": {
+        "models.UpdateSongResponse": {
             "type": "object",
             "properties": {
-                "group_name": {
+                "message": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
-                },
-                "link": {
-                    "type": "string"
-                },
-                "release_date": {
-                    "type": "string"
-                },
-                "song_name": {
-                    "type": "string"
-                },
-                "text": {
-                    "type": "string"
+                "success": {
+                    "type": "boolean"
                 }
             }
         },

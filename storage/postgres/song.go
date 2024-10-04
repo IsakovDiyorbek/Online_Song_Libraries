@@ -44,33 +44,7 @@ func (s *SongLibrary) AddSong(req *models.AddSongRequest) (*models.AddSongRespon
 	}, nil
 }
 
-func (s *SongLibrary) GetSongs(filter *models.SongFilter) (*[]models.Song, error) {
-	query := `SELECT id, group_name, song_name, release_date, link 
-              FROM songs 
-              WHERE ($1::text IS NULL OR group_name ILIKE $1) 
-              AND ($2::text IS NULL OR song_name ILIKE $2) 
-              LIMIT $3 OFFSET $4`
 
-	offset := (filter.Page - 1) * filter.PageSize
-	rows, err := s.db.Query(query, filter.GroupName, filter.SongName, filter.PageSize, offset)
-	if err != nil {
-		log.Println("Error executing query: %v", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	var songs []models.Song
-	for rows.Next() {
-		var song models.Song
-		if err := rows.Scan(&song.ID, &song.GroupName, &song.SongName, &song.ReleaseDate, &song.Link); err != nil {
-			log.Println("Error scanning row: %v", err)
-			return nil, err
-		}
-		songs = append(songs, song)
-	}
-
-	return &songs, nil
-}
 func (s *SongLibrary) GetAll(req *models.GetAllSongsRequest) ([]*models.Song, error) {
     query := `SELECT id, group_name, song_name, release_date, text, link FROM songs WHERE 1=1`
     var args []interface{}
@@ -117,17 +91,18 @@ func (s *SongLibrary) GetAll(req *models.GetAllSongsRequest) ([]*models.Song, er
     return songs, nil
 }
 
-func (s *SongLibrary) DeleteSong(songID string) error {
+func (s *SongLibrary) DeleteSong(req *models.DeleteSongRequest) (*models.DeleteSongResponse, error) {
+
 	query := `DELETE FROM songs WHERE id = $1`
-	_, err := s.db.Exec(query, songID)
+	_, err := s.db.Exec(query, req.Id)
 	if err != nil {
 		log.Println("Error executing query: %v", err)
-		return err
+		return nil, err
 	}
-	return nil
+	return &models.DeleteSongResponse{Message: "Song deleted successfully", Success: true}, nil
 }
 
-func (s *SongLibrary) UpdateSong(songID string, req models.UpdateSongRequest) error {
+func (s *SongLibrary) UpdateSong(req *models.UpdateSongRequest) (*models.UpdateSongResponse, error) {
 	query := `UPDATE songs SET`
 	params := []interface{}{}
 	paramCount := 1
@@ -160,37 +135,47 @@ func (s *SongLibrary) UpdateSong(songID string, req models.UpdateSongRequest) er
 
 	query = query[:len(query)-1]
 	query += fmt.Sprintf(" WHERE id = $%d", paramCount)
-	params = append(params, songID)
+	params = append(params, req.Id)
 
 	_, err := s.db.Exec(query, params...)
 	if err != nil {
-		return fmt.Errorf("failed to update song: %v", err)
+		log.Println("Error executing query: %v", err)
+
+		return nil, err
 	}
 
-	return nil
+	return &models.UpdateSongResponse{Message: "Song updated successfully", Success: true}, nil
 }
-func (s *SongLibrary) GetSongText(songID string, verseNum int) (*models.VerseResponse, error) {
+
+func (s *SongLibrary) GetSongText(req *models.GetSongTextRequest) (*models.GetSongTextResponse, error) {
 	query := `SELECT text FROM songs WHERE id = $1`
+
 	var fullText string
-	err := s.db.QueryRow(query, songID).Scan(&fullText)
+
+	err := s.db.QueryRow(query, req.Id).Scan(&fullText)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("song with ID %s not found", req.Id)
+		}
 		return nil, fmt.Errorf("failed to get song text: %v", err)
 	}
 
+	if len(fullText) == 0 {
+		return nil, fmt.Errorf("song text is empty for ID %s", req.Id)
+	}
 
 	verses := strings.Split(fullText, "\n\n")
 
-
-	if verseNum < 1 || verseNum > len(verses) {
-		return nil, fmt.Errorf("verse number %d out of range, total verses: %d", verseNum, len(verses))
+	if req.VerseNum < 1 || req.VerseNum > len(verses) {
+		return nil, fmt.Errorf("verse number %d out of range, total verses: %d", req.VerseNum, len(verses))
 	}
 
-
-	return &models.VerseResponse{
-		Id:  songID,
-		VersNum: verseNum,
-		Text:    strings.TrimSpace(verses[verseNum-1]),
+	return &models.GetSongTextResponse{
+		Id:      req.Id,
+		VerseNum: req.VerseNum,
+		Text:    strings.TrimSpace(verses[req.VerseNum-1]),
 	}, nil
 }
+
 
 

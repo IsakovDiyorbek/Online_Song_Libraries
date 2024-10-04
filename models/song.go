@@ -2,14 +2,12 @@ package models
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Song struct {
-	ID          string `json:"id"`			
-	GroupName   string    `json:"group_name"`        // Название группы
-	SongName    string    `json:"song_name"`         // Название песни
+	ID          string    `json:"id"`
+	GroupName   string    `json:"group_name"`   // Название группы
+	SongName    string    `json:"song_name"`    // Название песни
 	ReleaseDate string    `json:"release_date"` // Дата релиза
 	Text        string    `json:"text"`         // Текст песни
 	Link        string    `json:"link"`         // Ссылка на песню
@@ -17,53 +15,73 @@ type Song struct {
 	UpdatedAt   time.Time `json:"updated_at"`   // Дата обновления записи
 }
 
-
 type AddSongRequest struct {
-	GroupName   string    `json:"group_name"`        // Название группы
-	SongName    string    `json:"song_name"`         // Название песни
-	ReleaseDate string    `json:"release_date"` // Дата релиза
-	Text        string    `json:"text"`         // Текст песни
-	Link        string    `json:"link"`         // Ссылка на песню
+	GroupName   string `json:"group_name"`   // Название группы
+	SongName    string `json:"song_name"`    // Название песни
+	ReleaseDate string `json:"release_date"` // Дата релиза
+	Text        string `json:"text"`         // Текст песни
+	Link        string `json:"link"`         // Ссылка на песню
 }
-
 
 type AddSongResponse struct {
-    Success bool   `json:"success"`  // Успех операции
-    Message string `json:"message"`  // Сообщение о результате
-    SongID  string  `json:"id"`  // ID добавленной песни
+	Success bool   `json:"success"` // Успех операции
+	Message string `json:"message"` // Сообщение о результате
+	SongID  string `json:"id"`      // ID добавленной песни
 }
 
-
-type SongFilter struct{
-	GroupName   string    `json:"group_name"`
-	SongName    string    `json:"song_name"`   
-	Page int
-	PageSize int
+type SongFilter struct {
+	GroupName string `json:"group_name"`
+	SongName  string `json:"song_name"`
+	Page      int
+	PageSize  int
 }
-
 
 type UpdateSongRequest struct {
-	ID          uuid.UUID `json:"id"`		
-    GroupName   string `json:"group_name,omitempty"`
-    SongName    string `json:"song_name,omitempty"`
-    ReleaseDate string `json:"release_date,omitempty"`
-    Text        string `json:"text,omitempty"`
-    Link        string `json:"link,omitempty"`
+	Id          string `json:"id"`
+	GroupName   string `json:"group_name,omitempty"`
+	SongName    string `json:"song_name,omitempty"`
+	ReleaseDate string `json:"release_date,omitempty"`
+	Text        string `json:"text,omitempty"`
+	Link        string `json:"link,omitempty"`
+}
+
+type UpdateSongResponse struct {
+	Success bool
+	Message string
 }
 
 
 type GetAllSongsRequest struct {
-    GroupName string `json:"group_name"`
-    SongName  string `json:"song_name"`
-    Text      string `json:"text"`
-    Limit     int    `json:"limit"`
-    Offset    int    `json:"offset"`
+	GroupName string `json:"group_name"`
+	SongName  string `json:"song_name"`
+	Text      string `json:"text"`
+	Limit     int    `json:"limit"`
+	Offset    int    `json:"offset"`
+}
+
+type VerseResponse struct {
+	Id      string `json:"id"`
+	VersNum int    `json:"verseNum"`
+	Text    string `json:"text"`
+}
+
+type DeleteSongRequest struct {
+	Id string `json:"id"`
+}
+
+type DeleteSongResponse struct {
+	Success bool
+	Message string
 }
 
 
+type GetSongTextRequest struct{
+	Id string `json:"id"`
+	VerseNum int
+}
 
-type VerseResponse struct {
-	Id   string  `json:"id"`
-	VersNum  int    `json:"verseNum"`
-	Text     string `json:"text"`
+type GetSongTextResponse struct{
+	Id string `json:"id"`
+	VerseNum int
+	Text string
 }

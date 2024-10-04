@@ -14,7 +14,7 @@ mig-create:
 	migrate create -ext sql -dir migrations -seq create_table
 
 mig-insert:
-	migrate create -ext sql -dir db/migrations -seq insert_table
+	migrate create -ext sql -dir migrations -seq insert_table
 
 
 SWAGGER := ~/go/bin/swag

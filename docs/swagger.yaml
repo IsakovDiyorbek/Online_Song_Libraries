@@ -29,6 +29,13 @@ definitions:
         description: Успех операции
         type: boolean
     type: object
+  models.DeleteSongResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
   models.Song:
     properties:
       created_at:
@@ -55,20 +62,12 @@ definitions:
         description: Дата обновления записи
         type: string
     type: object
-  models.UpdateSongRequest:
+  models.UpdateSongResponse:
     properties:
-      group_name:
+      message:
         type: string
-      id:
-        type: string
-      link:
-        type: string
-      release_date:
-        type: string
-      song_name:
-        type: string
-      text:
-        type: string
+      success:
+        type: boolean
     type: object
   models.VerseResponse:
     properties:
@@ -83,45 +82,6 @@ info:
   contact: {}
 paths:
   /songs:
-    get:
-      consumes:
-      - application/json
-      description: Get songs from the library
-      parameters:
-      - description: Group name
-        in: query
-        name: group_name
-        type: string
-      - description: Song name
-        in: query
-        name: song_name
-        type: string
-      - description: Page number
-        in: query
-        name: page
-        type: integer
-      - description: Page size
-        in: query
-        name: page_size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Song'
-            type: array
-        "400":
-          description: Bad Request
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get songs
-      tags:
-      - songs
     post:
       consumes:
       - application/json
@@ -156,17 +116,17 @@ paths:
       description: Delete song by ID
       parameters:
       - description: Song ID
-        in: path
+        in: query
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.AddSongResponse'
+            $ref: '#/definitions/models.DeleteSongResponse'
         "400":
           description: Bad Request
           schema: {}
@@ -182,23 +142,37 @@ paths:
       description: Update song by ID
       parameters:
       - description: Song ID
-        in: path
+        in: query
         name: id
         required: true
         type: string
-      - description: Song data
-        in: body
-        name: song
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateSongRequest'
+      - description: Group Name
+        in: query
+        name: group_name
+        type: string
+      - description: Song Name
+        in: query
+        name: song_name
+        type: string
+      - description: Release Date
+        in: query
+        name: release_date
+        type: string
+      - description: Text
+        in: query
+        name: text
+        type: string
+      - description: Link
+        in: query
+        name: link
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.AddSongResponse'
+            $ref: '#/definitions/models.UpdateSongResponse'
         "400":
           description: Bad Request
           schema: {}
@@ -215,13 +189,13 @@ paths:
       description: Get song text by verse number
       parameters:
       - description: Song ID
-        in: path
+        in: query
         name: id
         required: true
         type: string
-      - description: Verse number
-        in: path
-        name: verseNum
+      - description: Verse Number
+        in: query
+        name: verse_num
         required: true
         type: integer
       produces:
