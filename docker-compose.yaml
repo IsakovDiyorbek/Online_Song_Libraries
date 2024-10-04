@@ -1,0 +1,53 @@
+version: '3.9'
+
+services: 
+  migrate:
+    image: migrate/migrate
+    networks:
+      - GLhost
+    volumes:
+      - ./migrations:/migrations
+    command: [ "-path", "/migrations", "-database",  
+                "postgres://postgres:20005@library_Song:5432/music_library?sslmode=disable", 
+                "up" ]
+    depends_on:
+      - postgres-db2    
+
+  postgres-db2:
+    container_name: library_Song #post
+    image: postgres:latest
+    environment:
+      PGUSER: postgres
+      POSTGRES_PASSWORD: 20005
+      PGDATA: /data/postgres
+      POSTGRES_DB: music_library 
+    volumes:
+      - db:/memory-database/memory-memory
+    ports:
+      - "5438:5432"
+    networks:
+      - GLhost
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5   
+
+  library_service:
+    container_name: library_song_service
+    build: .
+    depends_on:
+      - postgres-db2
+    ports:
+      - "7777:7777"
+    networks:
+      - GLhost     
+
+networks:
+  GLhost:
+    external: true
+    driver: bridge      
+
+volumes:
+  db: 
