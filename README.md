@@ -43,4 +43,4 @@
 
 ## Документация Swagger
 
-Документация Swagger доступна по адресу: [localhost:7777/api/swagger/index.html#/](localhost:7777/api/swagger/index.html#/)
+Документация Swagger доступна по адресу: [http://localhost:7777/api/swagger/index.html#/](http://localhost:7777/api/swagger/index.html#/)
